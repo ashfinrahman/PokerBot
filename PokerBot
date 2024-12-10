@@ -1,0 +1,104 @@
+import discord
+from discord.ext import commands
+from discord import app_commands
+import random
+partylist = []
+gamestate = ''
+rank = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 'A']
+suit = ['hearts', 'clubs', 'diamonds', 'spades']
+pn1 = 0
+ps1 = ''
+pn2 = 0
+ps2 = ''
+dn1 = 0
+ds1 = ''
+dn2 = 0
+ds2 = ''
+flop = []
+class Client(commands.Bot):
+    async def on_ready(self):
+        print(f'Logged on as {self.user}!')
+
+        try:
+            guild = discord.Object(id=1314363014845038836)
+            synced = await self.tree.sync(guild=guild)
+            print(f'Synced {len(synced)} commands to guild {guild.id}')
+
+        except Exception as e:
+            print(f'error syncing commands: {e}')
+
+    async def on_message(self, message):
+        if  message.content.startswith('p!'):
+            await message.channel.send('Hello! Starting your poker game now!')
+            pn1 = rank[random.randint(0,12)]
+            ps1 = suit[random.randint(0,3)]
+            await message.channel.send(f"your first card is the {pn1} of {ps1}")
+            pn2 = rank[random.randint(0,12)]
+            ps2 = suit[random.randint(0,3)]
+            await message.channel.send(f"your second card is the {pn2} of {ps2}")
+            await message.channel.send("Now showing the dealer\'s hand:")
+            dn1 = rank[random.randint(0,12)]
+            ds1 = suit[random.randint(0,3)]
+            await message.channel.send(f"Dealer\'s first card is the {dn1} of {ds1}")
+            dn2 = rank[random.randint(0,12)]
+            ds2 = suit[random.randint(0,3)]
+            await message.channel.send(f"Dealer\'s second card is the {dn2} of {ds2}")
+        if message.content.startswith('flop'):
+            flop.append(rank[random.randint(0,12)])
+            flop.append(suit[random.randint(0,3)])
+            flop.append(rank[random.randint(0,12)])
+            flop.append(suit[random.randint(0,3)])
+            flop.append(rank[random.randint(0,12)])
+            flop.append(suit[random.randint(0,3)])
+            await message.channel.send(flop)
+        if message.content.startswith('turn'):
+            await message.channel.send(f'The turn is a {rank[random.randint(0,12)]} of {suit[random.randint(0,3)]}!')
+        if message.content.startswith('river'):
+            await message.channel.send(f'The last card is the {rank[random.randint(0,12)]} of {suit[random.randint(0,3)]}!')
+            await message.channel.send('Did you win?')
+        if message.content.startswith('yes'):
+            await message.channel.send('Hooray!')
+        if message.content.startswith('no'):
+            await message.channel.send('Aw! Better luck next time!')
+        
+
+
+
+intents = discord.Intents.default()
+intents.message_content = True
+client = Client(command_prefix='!', intents = intents)
+GUILD_ID = discord.Object(id=1314363014845038836)
+
+@client.tree.command(name = 'hello', description = 'say hello', guild=GUILD_ID)
+async def sayHello(interaction: discord.Interaction):
+    await interaction.response.send_message('Hi there')
+
+@client.tree.command(name = 'createparty', description = 'create a party!', guild=GUILD_ID)
+async def createparty(interaction: discord.Interaction):
+    await interaction.response.send_message(f'Started and added {interaction.user} to party!')
+    partylist.append(interaction.user.name)
+    gamestate = 'created party'
+
+@client.tree.command(name = 'party', description = 'view your party!', guild=GUILD_ID)
+async def party(interaction: discord.Interaction):
+    await interaction.response.send_message(f'{partylist}')
+
+@client.tree.command(name = 'joinparty', description = 'join a party!', guild=GUILD_ID)
+async def joinparty(interaction: discord.Interaction):
+    await interaction.response.send_message(f'added {interaction.user} to party!')
+    partylist.append(interaction.user.name)
+
+@client.tree.command(name = 'pokerstart', description = 'start a game of poker!', guild=GUILD_ID)
+async def pokerstart(interaction: discord.Interaction):
+    random.shuffle(rank)
+    random.shuffle(suit)
+    await interaction.response.send_message(rank[random.randint(0,12)])
+    await message.channel.send(suit[random.randint(0,3)])
+    await message.channel.send('This is your hand!')
+    random.shuffle(rank)
+    random.shuffle(suit)
+    await message.channel.send(rank[0])
+    await message.channel.send(suit[0])
+    await message.channel.send("This is the dealer's hand!")
+
+client.run('MTMxMzY1MTgxMjc5NTk0NTAyMQ.G_s9a6.-bGRgihhXg8T2vSng5QReH_jB4rLZm39VQJZhY')
